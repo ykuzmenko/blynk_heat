@@ -1,3 +1,18 @@
+#define BLYNK_PRINT Serial
+
+
+#include <SPI.h>
+#include <Ethernet.h>
+#include <BlynkSimpleEthernet.h>
+
+// You should get Auth Token in the Blynk App.
+// Go to the Project Settings (nut icon).
+
+
+#define W5100_CS  10
+#define SDCARD_CS 4
+
+
 long interval = 6000;
 long checkInterval = 300;
 long lastCheckMillis = 0;
@@ -37,7 +52,13 @@ void setup () {
   pinMode(ENABLE_PIN, OUTPUT);
   pinMode(CLOSED_SENSOR_PIN, INPUT);
   pinMode(OPEN_SENSOR_PIN,INPUT);
+
+  pinMode(SDCARD_CS, OUTPUT);
+  digitalWrite(SDCARD_CS, HIGH); // Deselect the SD card
+
   Serial.begin(9600);
+
+  Blynk.begin(auth, "", 8442);
 }
 
 void motorEnable(){
@@ -73,10 +94,10 @@ positionStates getPosition() {
     // Serial.println("Check closed:");
     moveClose();
     closedSensorValue = digitalRead(CLOSED_SENSOR_PIN);
-    Serial.print("closedSensorValue");
+    // Serial.print("closedSensorValue");
     // Serial.println(closedSensorValue);
     openSensorValue = digitalRead(OPEN_SENSOR_PIN);
-    Serial.print("openSensorValue");
+    // Serial.print("openSensorValue");
     // Serial.println(openSensorValue );
     if (closedSensorValue == LOW) {
       // Serial.println("Closed state sensor fired");
@@ -92,10 +113,10 @@ positionStates getPosition() {
     moveOpen();
 //    moveClose();
     closedSensorValue = digitalRead(CLOSED_SENSOR_PIN);
-    Serial.print("closedSensorValue");
+    // Serial.print("closedSensorValue");
     // Serial.println(closedSensorValue);
     openSensorValue = digitalRead(OPEN_SENSOR_PIN);
-    Serial.print("openSensorValue");
+    // Serial.print("openSensorValue");
     // Serial.println(openSensorValue );
     if (openSensorValue == LOW) {
       // Serial.println("Open state sensor fired");
@@ -110,12 +131,29 @@ positionStates getPosition() {
   }
 }
 
+BLYNK_WRITE(V1) {
+  int pinData = param.asInt();
+  Serial.println("v1 received");
+
+  if (pinData == 1 && getPosition() == opened) {
+    Serial.println("Closing");
+    moveClose();
+  }
+
+  if (pinData == 0 && getPosition() == closed) {
+    Serial.println("Opening");
+    moveOpen();
+  }  
+}
+
 void loop(){
   unsigned long currentMillis = millis();
-
+  
+  Blynk.run();
+  
   if (currentMillis - lastCheckMillis > checkInterval) {
     lastCheckMillis = currentMillis;
-     switch (moveDir) {
+    switch (moveDir) {
       case closing:
         closedSensorValue = digitalRead(CLOSED_SENSOR_PIN);
         if (closedSensorValue == 0) {
@@ -146,12 +184,10 @@ void loop(){
               // Serial.println("closed");
               moveOpen();
               break;
-        }
+          }
         break;
-     }
+      }
+    }
   }
 }
-}
-
-
 
