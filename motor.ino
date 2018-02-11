@@ -47,6 +47,8 @@ int ENABLE_PIN = 5;
 int CLOSED_SENSOR_PIN = 6;
 int OPEN_SENSOR_PIN = 7;
 
+BlynkTimer timer;
+
 void setup () {
   pinMode(INPUT1_PIN, OUTPUT);
   pinMode(INPUT2_PIN,OUTPUT);
@@ -58,6 +60,8 @@ void setup () {
   digitalWrite(SDCARD_CS, HIGH); // Deselect the SD card
 
   Serial.begin(9600);
+
+  timer.setInterval(300L, processMotion);
 
   Blynk.begin(auth, blynk_server, 8442);
 }
@@ -86,113 +90,75 @@ void moveOpen() {
 
 }
 
+int sensorTriggered(int sensorPin) {
+  return digitalRead(sensorPin) == HIGH;
+}
+
 positionStates getPosition() {
+  // Sensors can trigger only when motor is on
+
   if (moveDir == opening || moveDir == closing) {
     return state_undefined; 
   }
 
   if (moveDir == stopped) {
-    // Serial.println("Check closed:");
     moveClose();
-    closedSensorValue = digitalRead(CLOSED_SENSOR_PIN);
-    // Serial.print("closedSensorValue");
-    // Serial.println(closedSensorValue);
-    openSensorValue = digitalRead(OPEN_SENSOR_PIN);
-    // Serial.print("openSensorValue");
-    // Serial.println(openSensorValue );
-    if (closedSensorValue == HIGH) {
-      Serial.println("Closed state sensor fired");
+    if (sensorTriggered(CLOSED_SENSOR_PIN)) {
       return closed;
     }
-    if (openSensorValue == HIGH) {
-      Serial.println("Open state sensor fired");
+    if (sensorTriggered(OPEN_SENSOR_PIN)) {
       return opened;
     }
     
-  
-    // Serial.println("Check opened:");
     moveOpen();
-//    moveClose();
-    closedSensorValue = digitalRead(CLOSED_SENSOR_PIN);
-    // Serial.print("closedSensorValue");
-    // Serial.println(closedSensorValue);
-    openSensorValue = digitalRead(OPEN_SENSOR_PIN);
-    // Serial.print("openSensorValue");
-    // Serial.println(openSensorValue );
-    if (openSensorValue == HIGH) {
-      Serial.println("Open state sensor fired");
+    if (sensorTriggered(OPEN_SENSOR_PIN)) {
       return opened;
     }
-    if (closedSensorValue == HIGH) {
-      Serial.println("Closed state sensor fired");
+    if (sensorTriggered(CLOSED_SENSOR_PIN)) {
       return closed;
     }
-    // Serial.println("Nothing fired");
     return state_undefined;
   }
 }
 
 BLYNK_WRITE(V1) {
-  int pinData = param.asInt();
-  Serial.println("v1 received");
+  int buttonState = param.asInt();
 
-  // if (pinData == 1 && getPosition() == opened) {
-  if (pinData == 1) {
-    Serial.println("Closing");
+  if (buttonState == 0) {
     moveClose();
   }
 
-  // if (pinData == 0 && getPosition() == closed) {
-  if (pinData == 0) {
-    Serial.println("Opening");
+  if (buttonState == 1) {
     moveOpen();
   }  
 }
 
-void loop(){
-  unsigned long currentMillis = millis();
-  
-  Blynk.run();
-  
-  if (currentMillis - lastCheckMillis > checkInterval) {
-    lastCheckMillis = currentMillis;
-    Serial.print("Move dir: ");
-    Serial.println(moveDir);
+BLYNK_CONNECTED() {
+  Blynk.syncVirtual(V1);
+}
+
+void processMotion() {
     switch (moveDir) {
       case closing:
-        closedSensorValue = digitalRead(CLOSED_SENSOR_PIN);
-        if (closedSensorValue == HIGH) {
+        if (sensorTriggered(CLOSED_SENSOR_PIN)) {
           motorDisable();
         }
         break;
 
       case opening:
-        openSensorValue = digitalRead(OPEN_SENSOR_PIN);
-        if (openSensorValue == HIGH) {
+        if (sensorTriggered(OPEN_SENSOR_PIN)) {
           motorDisable();          
         }
         break;
      
       case stopped:
-        if (firstRun) {
-          firstRun = 0;
-          switch(getPosition()){
-            case state_undefined :
-              // Serial.println("Undefined");
-              moveClose();
-              break;
-            case opened :
-              // Serial.println("opened");
-              moveClose();
-              break;
-            case closed :
-              // Serial.println("closed");
-              moveOpen();
-              break;
-          }
         break;
-      }
-    }
-  }
+    }  
+}
+
+
+void loop(){
+  Blynk.run();
+  timer.run();
 }
 
