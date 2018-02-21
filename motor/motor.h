@@ -41,6 +41,25 @@ void moveOpen() {
 
 }
 
+void processMotion() {
+    switch (moveDir) {
+      case closing:
+        if (sensorTriggered(CLOSED_SENSOR_PIN)) {
+          motorDisable();
+        }
+        break;
+
+      case opening:
+        if (sensorTriggered(OPEN_SENSOR_PIN)) {
+          motorDisable();          
+        }
+        break;
+     
+      case stopped:
+        break;
+    }  
+}
+
 positionStates getPosition() {
   // Sensors can trigger only when motor is on
 
@@ -66,23 +85,7 @@ positionStates getPosition() {
     }
     return state_undefined;
   }
+  return  state_undefined;
 }
 
-void processMotion() {
-    switch (moveDir) {
-      case closing:
-        if (sensorTriggered(CLOSED_SENSOR_PIN)) {
-          motorDisable();
-        }
-        break;
 
-      case opening:
-        if (sensorTriggered(OPEN_SENSOR_PIN)) {
-          motorDisable();          
-        }
-        break;
-     
-      case stopped:
-        break;
-    }  
-}

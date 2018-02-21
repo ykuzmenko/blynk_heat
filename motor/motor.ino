@@ -35,6 +35,11 @@ int OPEN_SENSOR_PIN = 7;
 #include "motor.h"
 
 BlynkTimer timer;
+MyTimer my_timer;
+
+const int timerCount = 2;
+MyTimer* my_timers = new MyTimer[timerCount];
+
 
 void setup () {
   pinMode(INPUT1_PIN, OUTPUT);
@@ -53,7 +58,7 @@ void setup () {
   Blynk.begin(auth, blynk_server, 8442);
 
   setSyncInterval(10 * 60);
-  timer.setInterval(10000L, checkTimers);
+  timer.setInterval(60000L, check_my_timers);
 }
 
 
@@ -71,12 +76,38 @@ BLYNK_WRITE(V1) {
 
 BLYNK_WRITE(V2) {
   TimeInputParam t(param);
-  updateTimer(t);
+
+  MyTimer mt = MyTimer();
+  mt.init_from_timeinput(t);
+
+  my_timers[0] = mt;
+}
+
+
+BLYNK_WRITE(V3) {
+  TimeInputParam t(param);
+
+  MyTimer mt = MyTimer();
+  mt.init_from_timeinput(t);
+
+  my_timers[1] = mt;
+
 }
 
 BLYNK_CONNECTED() {
   Blynk.syncVirtual(V1);
   rtc.begin();
+}
+
+void check_my_timers() {
+ for (int i = 0; i < 2; i++) {
+   if (my_timers[i].checkStartTime()) {
+      moveOpen();
+   }
+   if (my_timers[i].checkStopTime()) {
+      moveClose();
+   }
+ }
 }
 
 void loop(){

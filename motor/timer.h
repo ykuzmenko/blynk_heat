@@ -3,24 +3,50 @@
 
 WidgetRTC rtc;
 
-typedef struct
- {
-     int startHour;
-     int startMinute;
-     int stopHour;
-     int stopMinute;
-     byte weekdays;
- }  timer_struct_type;
+class MyTimer {
+		int startHour;
+		int startMinute;
+		int stopHour;
+		int stopMinute;
 
-timer_struct_type timers[2];
+    public:
+        MyTimer() {
 
+        }
 
-timer_struct_type timers[2];
+        void init_from_timeinput(TimeInputParam t) {
+        	if (t.hasStartTime()) {
+        		startHour = t.getStartHour();
+        		startMinute = t.getStartMinute();
+  				}
+        }
 
-void checkTimers() {
+        void setStartTime(int startHour, int startMinute) {
+        	startHour = startHour;
+        	startMinute = startMinute;
+        }
+        
+        void setStopTime(int stopHour, int stopMinute) {
+					stopHour = stopHour;
+					stopMinute = stopMinute;
+        }
 
-}
+        int getStartTimeHour(void) {
+        	return(stopHour);
+        }
 
-void updateTimer(TimeInputParam time_input) {
-	timer_struct_type timer;	
-}
+        int getStartTimeMinute(void) {
+        	return(stopHour);
+        }
+
+        bool checkStartTime() {
+        	weekday();
+        	return hour() == startHour && minute() == startMinute;
+        }
+
+        bool checkStopTime() {
+        	weekday();
+        	return hour() == stopHour && minute() == stopMinute;
+        }
+};
+
