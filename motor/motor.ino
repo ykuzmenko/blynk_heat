@@ -5,34 +5,14 @@
 #include <BlynkSimpleEthernet.h>
 #include "blynk_secrets.h"
 
-#include "timer.h"
-
-// You should get Auth Token in the Blynk App.
-// Go to the Project Settings (nut icon).
-
-
 #define W5100_CS  10
 #define SDCARD_CS 4
 
-long interval = 6000;
-long checkInterval = 300;
-long lastCheckMillis = 0;
-long prevousMillis = 0;
 
-int openSensorValue = 1;
-int closedSensorValue = 1;
-int enable = 1;
+#define DEBUG true
 
-int firstRun = 1;
-
-int INPUT1_PIN = 9;
-int INPUT2_PIN = 8;
-
-int ENABLE_PIN = 5;
-int CLOSED_SENSOR_PIN = 6;
-int OPEN_SENSOR_PIN = 7;
-
-#include "motor.h"
+#include "my_motor.h"
+#include "timer.h"
 
 BlynkTimer timer;
 MyTimer my_timer;
@@ -42,19 +22,15 @@ MyTimer* my_timers = new MyTimer[timerCount];
 
 WidgetTerminal terminal(V10);
 
-void setup () {
-  pinMode(INPUT1_PIN, OUTPUT);
-  pinMode(INPUT2_PIN,OUTPUT);
-  pinMode(ENABLE_PIN, OUTPUT);
-  pinMode(CLOSED_SENSOR_PIN, INPUT);
-  pinMode(OPEN_SENSOR_PIN,INPUT);
+MyMotor my_motor = MyMotor(7, 6, 5, 9, 8);
 
+void setup () {
   pinMode(SDCARD_CS, OUTPUT);
   digitalWrite(SDCARD_CS, HIGH); // Deselect the SD card
 
   Serial.begin(9600);
 
-  timer.setInterval(300L, processMotion);
+  timer.setInterval(300L, motor_process);
 
   Blynk.begin(auth, blynk_server, 8442);
 
@@ -67,11 +43,11 @@ BLYNK_WRITE(V1) {
   int buttonState = param.asInt();
 
   if (buttonState == 0) {
-    moveClose();
+    my_motor.close();
   }
 
   if (buttonState == 1) {
-    moveOpen();
+    my_motor.open();
   }  
 }
 
@@ -100,6 +76,10 @@ BLYNK_CONNECTED() {
   rtc.begin();
 }
 
+void motor_process() {
+  my_motor.processMotion();
+}
+
 void check_my_timers() {
  for (int i = 0; i < 2; i++) {
    if (my_timers[i].checkStartTime()) {
@@ -108,7 +88,7 @@ void check_my_timers() {
       terminal.print(":");
       terminal.print(minute());
 
-      moveOpen();
+      my_motor.open();
    }
    if (my_timers[i].checkStopTime()) {
       terminal.print("Closed at: ");
@@ -116,7 +96,7 @@ void check_my_timers() {
       terminal.print(":");
       terminal.print(minute());
 
-      moveClose();
+      my_motor.close();
    }
  }
  terminal.flush();
