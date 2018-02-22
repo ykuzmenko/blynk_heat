@@ -40,6 +40,7 @@ MyTimer my_timer;
 const int timerCount = 2;
 MyTimer* my_timers = new MyTimer[timerCount];
 
+WidgetTerminal terminal(V10);
 
 void setup () {
   pinMode(INPUT1_PIN, OUTPUT);
@@ -95,19 +96,30 @@ BLYNK_WRITE(V3) {
 }
 
 BLYNK_CONNECTED() {
-  Blynk.syncVirtual(V1);
+  Blynk.syncVirtual(V1, V2, V3, V10);
   rtc.begin();
 }
 
 void check_my_timers() {
  for (int i = 0; i < 2; i++) {
    if (my_timers[i].checkStartTime()) {
+      terminal.print("Opened at: ");
+      terminal.print(hour());
+      terminal.print(":");
+      terminal.print(minute());
+
       moveOpen();
    }
    if (my_timers[i].checkStopTime()) {
+      terminal.print("Closed at: ");
+      terminal.print(hour());
+      terminal.print(":");
+      terminal.print(minute());
+
       moveClose();
    }
  }
+ terminal.flush();
 }
 
 void loop(){
