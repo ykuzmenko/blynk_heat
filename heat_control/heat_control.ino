@@ -22,7 +22,7 @@ MyTimer* my_timers = new MyTimer[timerCount];
 
 WidgetTerminal terminal(V10);
 
-MyMotor my_motor = MyMotor(7, 6, 5, 9, 8);
+ MyMotor my_motor(7, 6, 5, 9, 8);
 
 // byte arduino_mac[] = { 0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
 // IPAddress arduino_ip ( 192,   168,   2,  2);
@@ -40,7 +40,7 @@ void setup () {
   timer.setInterval(300L, motor_process);
 
   Blynk.begin(auth, blynk_server, 8442);
-  // Blynk.begin(auth, blynk_server, 8442, arduino_ip, dns_ip, gateway_ip, subnet_mask, arduino_mac);
+//  Blynk.begin(auth, blynk_server, 8442, arduino_ip, dns_ip, gateway_ip, subnet_mask, arduino_mac);
 
   my_motor.setup();
 
@@ -123,7 +123,7 @@ void check_my_timers() {
 }
 
 void log_to_terminal(String line) {
-  terminal.print(hour());
+    terminal.print(hour());
   terminal.print(":");
   terminal.print(minute());
   terminal.print(" ");

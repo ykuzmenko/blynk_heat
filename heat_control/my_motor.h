@@ -8,21 +8,20 @@ int input1_pin;
 int input2_pin;
 
 public:
-
   MyMotor(int open_sensor_pin, int closed_sensor_pin, int enable_pin, int input1_pin, int input2_pin ) {
-    open_sensor_pin = open_sensor_pin;
-    closed_sensor_pin = closed_sensor_pin;
-    enable_pin = enable_pin;
-    input1_pin = input1_pin;
-    input2_pin = input2_pin;
+    this->open_sensor_pin = open_sensor_pin;
+    this->closed_sensor_pin = closed_sensor_pin;
+    this->enable_pin = enable_pin;
+    this->input1_pin = input1_pin;
+    this->input2_pin = input2_pin;
   }
 
   void setup() {
-      pinMode(input1_pin, OUTPUT);
-      pinMode(input2_pin,OUTPUT);
-      pinMode(enable_pin, OUTPUT);
-      pinMode(closed_sensor_pin, INPUT);
-      pinMode(open_sensor_pin,INPUT);
+      pinMode(this->input1_pin, OUTPUT);
+      pinMode(this->input2_pin,OUTPUT);
+      pinMode(this->enable_pin, OUTPUT);
+      pinMode(this->closed_sensor_pin, INPUT);
+      pinMode(this->open_sensor_pin,INPUT);
   };
 
   enum moveDirections {
@@ -45,52 +44,52 @@ public:
   };
 
   void motorEnable(){
-    digitalWrite(enable_pin, HIGH);
+    digitalWrite(this->enable_pin, HIGH);
   };
 
   void motorDisable() {
-    digitalWrite(enable_pin, LOW);
-    moveDir = stopped;
+    digitalWrite(this->enable_pin, LOW);
+    this->moveDir = this->stopped;
   };
 
   void moveClose() {
-    motorEnable();
-    moveDir = closing;
-    digitalWrite(input2_pin, HIGH);
-    digitalWrite(input1_pin, LOW); 
+    this->motorEnable();
+    this->moveDir = this->closing;
+    digitalWrite(this->input2_pin, HIGH);
+    digitalWrite(this->input1_pin, LOW); 
   };
 
   void moveOpen() {
-    motorEnable();
-    moveDir = opening;
-    digitalWrite(input1_pin, HIGH); 
-    digitalWrite(input2_pin, LOW);  
+    this->motorEnable();
+    this->moveDir = this->opening;
+    digitalWrite(this->input1_pin, HIGH); 
+    digitalWrite(this->input2_pin, LOW);  
 
   };
 
   void open() {
-    moveOpen();
+    this->moveOpen();
   }
 
   void close() {
-    moveClose();
+    this->moveClose();
   }
 
   void processMotion() {
-      switch (moveDir) {
-        case closing:
-          if (sensorTriggered(closed_sensor_pin)) {
-            motorDisable();
+      switch (this->moveDir) {
+        case this->closing:
+          if (this->sensorTriggered(this->closed_sensor_pin)) {
+            this->motorDisable();
           }
           break;
 
-        case opening:
-          if (sensorTriggered(open_sensor_pin)) {
-            motorDisable();          
+        case this->opening:
+          if (this->sensorTriggered(this->open_sensor_pin)) {
+            this->motorDisable();          
           }
           break;
        
-        case stopped:
+        case this->stopped:
           break;
       }  
   };
@@ -98,29 +97,28 @@ public:
   positionStates getPosition() {
     // Sensors can trigger only when motor is on
 
-    if (moveDir == opening || moveDir == closing) {
+    if (this->moveDir == opening || this->moveDir == closing) {
       return state_undefined; 
     }
 
-    if (moveDir == stopped) {
-      moveClose();
-      if (sensorTriggered(closed_sensor_pin)) {
-        return closed;
+    if (this->moveDir == this->stopped) {
+      this->moveClose();
+      if (sensorTriggered(this->closed_sensor_pin)) {
+        return this->closed;
       }
-      if (sensorTriggered(open_sensor_pin)) {
-        return opened;
+      if (sensorTriggered(this->open_sensor_pin)) {
+        return this->opened;
       }
       
-      moveOpen();
-      if (sensorTriggered(open_sensor_pin)) {
-        return opened;
+      this->moveOpen();
+      if (sensorTriggered(this->open_sensor_pin)) {
+        return this->opened;
       }
-      if (sensorTriggered(closed_sensor_pin)) {
-        return closed;
+      if (sensorTriggered(this->closed_sensor_pin)) {
+        return this->closed;
       }
-      return state_undefined;
+      return this->state_undefined;
     }
-    return  state_undefined;
+    return this->state_undefined;
   };
-
 };
