@@ -1,12 +1,15 @@
-#define BLYNK_PRINT Serial
+//#define BLYNK_PRINT Serial
 
 #include <SPI.h>
-#include <Ethernet.h>
-#include <BlynkSimpleEthernet.h>
+//#include <Ethernet.h>
+//#include <BlynkSimpleEthernet.h>
 #include "blynk_secrets.h"
 
-#define W5100_CS  10
-#define SDCARD_CS 4
+#include <UIPEthernet.h>
+#include <BlynkSimpleUIPEthernet.h>
+
+//#define W5100_CS  10
+//#define SDCARD_CS 4
 
 
 #define DEBUG true
@@ -24,23 +27,13 @@ WidgetTerminal terminal(V10);
 
  MyMotor my_motor(7, 6, 5, 9, 8);
 
-// byte arduino_mac[] = { 0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
-// IPAddress arduino_ip ( 192,   168,   2,  2);
-// IPAddress dns_ip     (  8,   8,   8,   8);
-// IPAddress gateway_ip ( 192,   168,   2,   1);
-// IPAddress subnet_mask(255, 255, 255,   0);
-
-
 void setup () {
-  pinMode(SDCARD_CS, OUTPUT);
-  digitalWrite(SDCARD_CS, HIGH); // Deselect the SD card
 
   Serial.begin(9600);
 
   timer.setInterval(300L, motor_process);
 
   Blynk.begin(auth, blynk_server, 8442);
-//  Blynk.begin(auth, blynk_server, 8442, arduino_ip, dns_ip, gateway_ip, subnet_mask, arduino_mac);
 
   my_motor.setup();
 
