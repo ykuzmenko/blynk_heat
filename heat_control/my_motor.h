@@ -40,7 +40,7 @@ public:
   enum positionStates posState;
 
   int sensorTriggered(int sensorPin) {
-    return digitalRead(sensorPin) == HIGH;
+    return digitalRead(sensorPin) == LOW;
   };
 
   void motorEnable(){

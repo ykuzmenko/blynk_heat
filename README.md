@@ -10,6 +10,6 @@ MyMotor(open_sensor_pin, closed_sensor_pin, enable_pin, input1_pin, input2_pin)
 
 rename blynk_secrets.h.in into blynk_secrets.h and edit values
 
-#Blynk project setting
+# Blynk project setting
 
 ![Blynk project setting](https://github.com/ykuzmenko/blynk_heat/blob/master/blynk_settings.jpg)
