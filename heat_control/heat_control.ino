@@ -108,7 +108,7 @@ void motor_process() {
 void check_my_timers() {
 //   log_to_terminal("check timers");
 
-   for (int i = 0; i < 2; i++) {
+   for (int i = 0; i < timerCount; i++) {
      if (my_timers[i].checkStartTime()) {
         log_to_terminal("open by Timer");
 
